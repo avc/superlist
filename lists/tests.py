@@ -16,7 +16,9 @@ class HomePageTest(TestCase):
         
         self.assertEqual(Item.objects.count(), 1)
         self.assertEqual(Item.objects.first().text, 'A new list item')
-        
+    
+    def test_redirects_after_post(self):
+        response = self.client.post('/', data={'item_text': 'A new list item'})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], '/')
         
