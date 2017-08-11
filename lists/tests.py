@@ -22,12 +22,19 @@ class HomePageTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], '/')
         
-        # self.assertIn('A new list item', response.content.decode())
-        #         self.assertTemplateUsed(response, 'home.html')
-        
     def test_only_save_when_necessary(self):
         response = self.client.get('/')
         self.assertEqual(Item.objects.count(), 0)
+        
+    def test_display_all_list_items(self):
+        Item.objects.create(text='itemey_1')
+        Item.objects.create(text='itemey_2')
+        
+        response = self.client.get('/')
+        html = response.content.decode()
+        
+        self.assertIn('itemey 1', html)
+        self.assertIn('itemey 2', html)
         
 class ItemModelTest(TestCase):
     
