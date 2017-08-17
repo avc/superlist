@@ -5,10 +5,11 @@ from selenium.webdriver.common.keys import Keys
 import time
 from selenium.common.exceptions import WebDriverException
 from django.test import tag
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 MAX_WAIT = 5
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -126,6 +127,7 @@ class NewVisitorTest(LiveServerTestCase):
         
         # Satisfied, they both go back to sleep
         
+    @tag('style')
     def test_layout_and_styling(self):
         # Edith goes to the home page.
         self.browser.get(self.live_server_url)
