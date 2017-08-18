@@ -9,9 +9,11 @@ def deploy():
     source_folder_name = 'src'
     source_folder = f'{site_folder}/{source_folder_name}'
     virtualenv_folder_name = 'virtualenv'
+    project_name = 'superlists'
+    
     #_create_directory_structure_if_necessary(site_folder)
     _get_latest_source(source_folder)
-    _update_settings(source_folder, env.host)
+    _update_settings(source_folder, env.host, project_name)
     _update_virtualenv(source_folder, virtualenv_folder_name)
     _update_static_files(source_folder)
     _update_database(source_folder)
@@ -29,17 +31,17 @@ def _get_latest_source(source_folder):
     current_commit = local('git log -n 1 --format=%H', capture=True)
     run(f'cd {source_folder} && git reset --hard {current_commit}')
     
-def _update_settings(source_folder, host):
+def _update_settings(source_folder, host, project_name):
     # Debug false
-    settings_file = source_folder + '/superlists/settings.py'
-    sed(settings_file, 'DEBUG = True', 'DEBUG = FALSE')
+    settings_file = f'{source_folder}/{project_name}/settings.py'
+    sed(settings_file, 'DEBUG = True', 'DEBUG = False')
     sed(settings_file, 
         'ALLOWED_HOSTS = .+$', 
         f'ALLOWED_HOSTS = ["{host}"]'
     )
 
     # Secret key
-    secret_key_file = f'{source_folder}/secret_key.py'
+    secret_key_file = f'{source_folder}/{project_name}/secret_key.py'
     if not exists(secret_key_file):
         chars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)"
         secret_key = ''.join(random.SystemRandom().choice(chars) for _ in range(50))
@@ -72,12 +74,12 @@ def _link_wsgi(site_folder, source_folder_name, virtualenv_folder_name):
     sed(
         full_wsgi_file_path,
         'VIRTUALENV = .+$',
-        'VIRTUALENV = "{site_folder}/{virtualenv_folder_name}"'
+        f'VIRTUALENV = "{site_folder}/{virtualenv_folder_name}"'
     )
     sed(
         full_wsgi_file_path,
         "sys.path.append\(cwd \+.+\)$",
-        "sys.path.append(cwd + '/{source_folder_name}')"
+        f'sys.path.append(cwd + "/{source_folder_name}")'
     )
     run(
         f'cd {site_folder}'
