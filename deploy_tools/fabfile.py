@@ -29,9 +29,9 @@ def _get_latest_source(source_folder):
 def _update_settings(source_folder, host):
     # Debug false
     settings_file = source_folder + '/superlists/settings.py'
-    sed(settings_file, '\bDEBUG = True\b', 'DEBUG = FALSE')
+    sed(settings_file, 'DEBUG = True', 'DEBUG = FALSE')
     sed(settings_file, 
-        '\bALLOWED_HOSTS = .+$', 
+        'ALLOWED_HOSTS = .+$', 
         f'ALLOWED_HOSTS = ["{host}"]'
     )
 
@@ -49,7 +49,7 @@ def _update_virtualenv(source_folder):
         run(f'python3 -m venv {virtualenv}')
     run(f'{virtualenv}/bin/pip install -r {source_folder}/requirements.txt')
 
-def _update_static(source_folder):
+def _update_static_files(source_folder):
     run(
         f'cd {source_folder}'
         ' && ../virtualenv/bin/python manage.py collectstatic --noinput'
