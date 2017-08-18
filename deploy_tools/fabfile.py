@@ -17,7 +17,7 @@ def deploy():
     _update_virtualenv(source_folder, virtualenv_folder_name)
     _update_static_files(source_folder)
     _update_database(source_folder)
-    _link_wsgi(site_folder, source_folder_name, virtualenv_folder_name)
+    _link_wsgi(site_folder, source_folder_name)
     
 def _create_directory_structure_if_necessary(site_folder):
     for subfolder in ('db', 'public/static', 'virtualenv', 'src'):
@@ -66,21 +66,8 @@ def _update_database(source_folder):
         ' && ../virtualenv/bin/python manage.py migrate --noinput'
     )
     
-def _link_wsgi(site_folder, source_folder_name, virtualenv_folder_name):
-    source_wsgi_file = 'staging_wsgi.py'
-    # Relative to site folder.
-    relative_wsgi_file_path = f'{source_folder_name}/deploy_tools/{source_wsgi_file}'
-    full_wsgi_file_path = f'{site_folder}/{relative_wsgi_file_path}'
-    sed(
-        full_wsgi_file_path,
-        'VIRTUALENV = .+$',
-        f'VIRTUALENV = "{site_folder}/{virtualenv_folder_name}"'
-    )
-    sed(
-        full_wsgi_file_path,
-        "sys.path.append\(cwd \+.+\)$",
-        f'sys.path.append(cwd + "/{source_folder_name}")'
-    )
+def _link_wsgi(site_folder, source_folder_name):
+    relative_wsgi_file_path = f'{source_folder_name}/deploy_tools/wsgi.py'
     run(
         f'cd {site_folder}'
         f' && ln -sf {relative_wsgi_file_path} passenger_wsgi.py'

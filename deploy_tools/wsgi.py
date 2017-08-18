@@ -1,5 +1,5 @@
 import sys, os
-VIRTUALENV = 'virtualenv'
+VIRTUALENV = "virtualenv"
 PROJECT = "superlists"
 
 # The virtualenv directory is a sibling of this file.
