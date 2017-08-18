@@ -38,7 +38,7 @@ def _update_settings(source_folder, host):
     # Secret key
     secret_key_file = f'{source_folder}/secret_key.py'
     if not exists(secret_key_file):
-        chars = "abcdefg1234"
+        chars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)"
         secret_key = ''.join(random.SystemRandom().choice(chars) for _ in range(50))
         append(secret_key_file, f'SECRET_KEY = "{secret_key}"')
     append(settings_file, '\nfrom .secret_key import SECRET_KEY')
