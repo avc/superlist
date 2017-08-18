@@ -6,7 +6,7 @@ REPO_URL = 'https://github.com/avc/superlists.git'
 
 def deploy():
     site_folder = f'/home/{env.user}/{env.host}'
-    source_folder = site_folder + '/source'
+    source_folder = site_folder + '/src'
     _create_directory_structure_if_necessary(site_folder)
     _get_latest_source(source_folder)
     _update_settings(source_folder, env.host)
