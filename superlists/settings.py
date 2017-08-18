@@ -25,10 +25,7 @@ SECRET_KEY = 'prfdi^vbe#7xca9y-uvqcgns%bu(9xlv79=$!(9law$4y!^dns'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'staging.percepticons.com',
-    'localhost',
-]
+ALLOWED_HOSTS = []
 
 
 # Application definition
