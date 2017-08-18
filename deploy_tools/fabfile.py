@@ -6,16 +6,19 @@ REPO_URL = 'https://github.com/avc/superlists.git'
 
 def deploy():
     site_folder = f'/home/{env.user}/{env.host}'
-    source_folder = site_folder + '/src'
-    _create_directory_structure_if_necessary(site_folder)
+    source_folder_name = 'src'
+    source_folder = f'{site_folder}/{source_folder_name}'
+    virtualenv_folder_name = 'virtualenv'
+    #_create_directory_structure_if_necessary(site_folder)
     _get_latest_source(source_folder)
     _update_settings(source_folder, env.host)
-    _update_virtualenv(source_folder)
+    _update_virtualenv(source_folder, virtualenv_folder_name)
     _update_static_files(source_folder)
     _update_database(source_folder)
+    _link_wsgi(site_folder, source_folder_name, virtualenv_folder_name)
     
 def _create_directory_structure_if_necessary(site_folder):
-    for subfolder in ('db', 'public/static', 'virtualenv' 'src'):
+    for subfolder in ('db', 'public/static', 'virtualenv', 'src'):
         run(f'mkdir -p {site_folder}/{subfolder}')
 
 def _get_latest_source(source_folder):
@@ -23,8 +26,8 @@ def _get_latest_source(source_folder):
         run(f'cd {source_folder} && git fetch')
     else:
         run(f'git clone {REPO_URL} {source_folder}')
-    current_head = local('git log -n 1 --format=%H', capture=True)
-    run(f'cd {source_folder} && git reset --hard {current_head}')
+    current_commit = local('git log -n 1 --format=%H', capture=True)
+    run(f'cd {source_folder} && git reset --hard {current_commit}')
     
 def _update_settings(source_folder, host):
     # Debug false
@@ -43,8 +46,8 @@ def _update_settings(source_folder, host):
         append(secret_key_file, f'SECRET_KEY = "{secret_key}"')
     append(settings_file, '\nfrom .secret_key import SECRET_KEY')
     
-def _update_virtualenv(source_folder):
-    virtualenv = f'{source_folder}/../virtualenv'
+def _update_virtualenv(source_folder, virtualenv_folder_name):
+    virtualenv = f'{source_folder}/../{virtualenv_folder_name}'
     if not exists(f'{virtualenv}/bin/pip'):
         run(f'python3 -m venv {virtualenv}')
     run(f'{virtualenv}/bin/pip install -r {source_folder}/requirements.txt')
@@ -61,3 +64,22 @@ def _update_database(source_folder):
         ' && ../virtualenv/bin/python manage.py migrate --noinput'
     )
     
+def _link_wsgi(site_folder, source_folder_name, virtualenv_folder_name):
+    source_wsgi_file = 'staging_wsgi.py'
+    # Relative to site folder.
+    relative_wsgi_file_path = f'{source_folder_name}/deploy_tools/{source_wsgi_file}'
+    full_wsgi_file_path = f'{site_folder}/{relative_wsgi_file_path}'
+    sed(
+        full_wsgi_file_path,
+        'VIRTUALENV = .+$',
+        'VIRTUALENV = "{site_folder}/{virtualenv_folder_name}"'
+    )
+    sed(
+        full_wsgi_file_path,
+        "sys.path.append\(cwd \+.+\)$",
+        "sys.path.append(cwd + '/{source_folder_name}')"
+    )
+    run(
+        f'cd {site_folder}'
+        f' && ln -sf {relative_wsgi_file_path} passenger_wsgi.py'
+    )
