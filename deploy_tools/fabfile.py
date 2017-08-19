@@ -46,7 +46,6 @@ def _update_settings(source_folder, host, project_name):
         chars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)"
         secret_key = ''.join(random.SystemRandom().choice(chars) for _ in range(50))
         append(secret_key_file, f'SECRET_KEY = "{secret_key}"')
-    append(settings_file, '\nfrom .secret_key import SECRET_KEY')
     
 def _update_virtualenv(source_folder, virtualenv_folder_name):
     virtualenv = f'{source_folder}/../{virtualenv_folder_name}'
@@ -72,3 +71,4 @@ def _link_wsgi(site_folder, source_folder_name):
         f'cd {site_folder}'
         f' && ln -sf {relative_wsgi_file_path} passenger_wsgi.py'
     )
+    run(f'touch {site_folder}/tmp/restart.txt')
