@@ -80,3 +80,19 @@ class NewListTest(TestCase):
         self.assertContains(response, expected_error)
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
+
+    def test_validation_errors_end_up_on_list_page(self):
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+        
+        response = self.client.post(
+            f'/lists/{correct_list.id}/',
+            data = {'item_text': ''}
+        )
+        
+        self.assertTemplateUsed(response, 'list.html')
+        expected_error = escape("You can't have an empty list item.")
+        self.assertContains(response, expected_error)
+        self.assertEqual(List.objects.count(), 0)
+        self.assertEqual(Item.objects.count(), 0)
+        
