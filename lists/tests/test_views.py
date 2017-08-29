@@ -58,7 +58,8 @@ class ListViewTest(TestCase):
             f'/lists/{correct_list.id}/',
             data = {'item_text': 'A new item for an existing list'}
         )
-        self.assertRedirects(response, f'/lists/{correct_list.id}/')
+        # Test that the URL is the same as the POST URL above, i.e. no redirect.
+        self.assertEqual(response.status_code, 200)
     
 class NewListTest(TestCase):
     
@@ -78,6 +79,9 @@ class NewListTest(TestCase):
         self.assertTemplateUsed(response, 'home.html')
         expected_error = escape("You can't have an empty list item.")
         self.assertContains(response, expected_error)
+        
+    def test_invalid_list_items_arent_saved(self):
+        response = self.client.post('/lists/new', data={'item_text': ''})
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
 
@@ -90,9 +94,10 @@ class NewListTest(TestCase):
             data = {'item_text': ''}
         )
         
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'list.html')
         expected_error = escape("You can't have an empty list item.")
         self.assertContains(response, expected_error)
-        self.assertEqual(List.objects.count(), 0)
+        self.assertEqual(List.objects.count(), 2)
         self.assertEqual(Item.objects.count(), 0)
         
