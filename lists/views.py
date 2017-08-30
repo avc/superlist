@@ -25,4 +25,4 @@ def new_list(request):
     except ValidationError:
         list_.delete()
         return render(request, 'home.html', {'error': "You can't have an empty list item."})
-    return redirect(f'/lists/{list_.id}/')
+    return redirect(list_)
